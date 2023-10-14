@@ -88,5 +88,11 @@ class Reader:
         curr_control_coords = CONTROL_COORDINATES[curr_control]
         dx = prev_control_coords.x - curr_control_coords.x
         dy = prev_control_coords.y - curr_control_coords.y
-        dist = math.sqrt(dx**2 + dy**2)
-        return dist
+        dist_pixels = math.sqrt(dx**2 + dy**2)
+
+        # convert to km
+        scale_str = self.config["map_scale_pixels"].split(":")
+        ratio = int(scale_str[0]) / int(scale_str[1])
+        dist_km = (dist_pixels / ratio) / 1000
+        
+        return dist_km
