@@ -1,15 +1,16 @@
-from typing import TypedDict
-import yaml
+from dataclasses import dataclass
 
 import pandas as pd
+import yaml
 
 CONFIG = {}
 
-class TeamResult(TypedDict):
+@dataclass
+class TeamResult:
     """
-    key: team_number is the unique ID of the team
-    value: result is a dataframe with the following columns
-        control - number of the control visited, int
+    team_number: the unique ID of the team
+    result: a dataframe with the following columns
+        control - number/name of the control visited, str
         cumulative_points, total points after arriving at the control, int
         time_split, time taken to travel from the previous control to the current control, Timedelta
         distance_travelled, straight-line distance travelled between previous and current control, float
