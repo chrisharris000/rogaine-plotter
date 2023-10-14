@@ -55,7 +55,7 @@ class Reader:
                 prev_entry = result.loc[len(result) - 1]
                 prev_control = prev_entry["control"]
 
-            distance_travelled = self._calculate_distance_travelled(prev_control, control)
+            distance_travelled = self.calculate_distance_between_controls(prev_control, control)
 
             entry = [control, int(float(cumulative_points)), pd.Timedelta(time_split), distance_travelled]
             result.loc[len(result)] = entry
@@ -80,7 +80,7 @@ class Reader:
         """
         pass
 
-    def _calculate_distance_travelled(self, prev_control: str, curr_control: str) -> float:
+    def calculate_distance_between_controls(self, prev_control: str, curr_control: str) -> float:
         """
         Calculate the distance in km between the previous control and the current control
         """
