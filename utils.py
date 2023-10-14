@@ -8,19 +8,6 @@ CONFIG = {}
 CONTROL_COORDINATES = {}
 
 @dataclass
-class TeamResult:
-    """
-    team_number: the unique ID of the team
-    result: a dataframe with the following columns
-        control - number/name of the control visited, str
-        cumulative_points, total points after arriving at the control, int
-        time_split, time taken to travel from the previous control to the current control, Timedelta
-        distance_travelled, straight-line distance travelled between previous and current control in km, float
-    """
-    team_number: int
-    result: pd.DataFrame
-
-@dataclass
 class PixelCoordinate:
     """
     x: x location pixel, 0 being left edge of pdf, positive rightwards
