@@ -9,7 +9,6 @@ class TeamResult(TypedDict):
     """
     key: team_number is the unique ID of the team
     value: result is a dataframe with the following columns
-        idx - unique index of indicating order in which controls were visited, int
         control - number of the control visited, int
         cumulative_points, total points after arriving at the control, int
         time_split, time taken to travel from the previous control to the current control, Timedelta
