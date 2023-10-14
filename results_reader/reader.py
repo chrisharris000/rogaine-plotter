@@ -1,8 +1,9 @@
+import math
 from pathlib import Path
 
 import pandas as pd
 
-from utils import TeamResult
+from utils import TeamResult, CONTROL_COORDINATES
 
 class Reader:
     """
@@ -47,7 +48,14 @@ class Reader:
                 time_split = "00:" + time_split
 
             # calculate distance travelled
-            distance_travelled = self._calculate_distance_travelled("", "")
+            prev_control = ""
+            if len(result) == 0:
+                prev_control = "HH"
+            else:
+                prev_entry = result.loc[len(result) - 1]
+                prev_control = prev_entry["control"]
+
+            distance_travelled = self._calculate_distance_travelled(prev_control, control)
 
             entry = [control, int(float(cumulative_points)), pd.Timedelta(time_split), distance_travelled]
             result.loc[len(result)] = entry
@@ -76,4 +84,9 @@ class Reader:
         """
         Calculate the distance in km between the previous control and the current control
         """
-        return 0.0
+        prev_control_coords = CONTROL_COORDINATES[prev_control]
+        curr_control_coords = CONTROL_COORDINATES[curr_control]
+        dx = prev_control_coords.x - curr_control_coords.x
+        dy = prev_control_coords.y - curr_control_coords.y
+        dist = math.sqrt(dx**2 + dy**2)
+        return dist
