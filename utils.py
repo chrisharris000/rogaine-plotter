@@ -4,9 +4,6 @@ from dataclasses import dataclass
 import pandas as pd
 import yaml
 
-CONFIG = {}
-CONTROL_COORDINATES = {}
-
 @dataclass
 class PixelCoordinate:
     """
@@ -16,15 +13,19 @@ class PixelCoordinate:
     x: int
     y: int
 
-# read config
-with open("config.yml", "r") as config_fp:
-    CONFIG = yaml.safe_load(config_fp)
+def get_config():
+    with open("config.yml", "r") as config_fp:
+        return yaml.safe_load(config_fp)
 
-# read control coordinates
-with open(CONFIG["control_coordinates"]) as control_fp:
-    csvreader = csv.reader(control_fp)
-    _fields = next(csvreader)
+def get_control_coordinates():
+    control_coordinates = {}
+    config = get_config()
+    with open(config["control_coordinates"]) as control_fp:
+        csvreader = csv.reader(control_fp)
+        _fields = next(csvreader)
 
-    for row in csvreader:
-        control_id, pixel_x, pixel_y = row
-        CONTROL_COORDINATES[control_id] = PixelCoordinate(int(pixel_x), int(pixel_y))
+        for row in csvreader:
+            control_id, pixel_x, pixel_y = row
+            control_coordinates[control_id] = PixelCoordinate(int(pixel_x), int(pixel_y))
+
+    return control_coordinates
