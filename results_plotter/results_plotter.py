@@ -1,8 +1,9 @@
+import datetime
+import time
+
 import cv2
 import numpy as np
 import pandas as pd
-
-import time
 
 class ResultsPlotter:
     """
@@ -27,7 +28,7 @@ class ResultsPlotter:
         sim_length = self.config["replay_length"]*60 # secs
         curr_event_time = 0.0   # hrs
         event_length = self.config["event_length"]  # hours
-        scale = (sim_length/3600) / (event_length)    # unitless, + 0.5 to account for late arrivals
+        scale = (sim_length/3600) / (event_length + 0.5)    # unitless, + 0.5 to account for late arrivals
         fps = 15    # frames per sec
         dt = 1/fps
 
@@ -35,7 +36,7 @@ class ResultsPlotter:
             # start with blank canvas for stats
             stats_width, stats_height = 750, 750
             stats_background = np.ones((stats_width, stats_height, 3))
-            stats_background = self.add_stats_text(stats_background)
+            stats_background = self.add_stats_text(stats_background, curr_event_time)
 
             cv2.imshow(map_window_name, self.map)
             cv2.imshow(stats_window_name, stats_background)
@@ -51,7 +52,7 @@ class ResultsPlotter:
 
         cv2.destroyAllWindows()
 
-    def add_stats_text(self, stats_background: np.ndarray) -> np.ndarray:
+    def add_stats_text(self, stats_background: np.ndarray, curr_event_time: float) -> np.ndarray:
         """
         Add the text to be display on the stats window, including:
          - the title
@@ -62,6 +63,7 @@ class ResultsPlotter:
 
         args:
         - stats_background: numpy array representing the area that stats can be written onto
+        - curr_event_time: float representing seconds since start of event
         """
         stats_font_settings = {
             "fontFace": cv2.FONT_HERSHEY_SIMPLEX,
@@ -78,7 +80,8 @@ class ResultsPlotter:
                     )
         
         # event duration clock
-        cv2.putText(stats_background, f"Local time {time.ctime(time.time())}", 
+        event_elapsed_text = str(datetime.timedelta(seconds=curr_event_time))
+        cv2.putText(stats_background, f"Time since event started: {event_elapsed_text}", 
                     (50, 150),
                     **stats_font_settings
                     )
