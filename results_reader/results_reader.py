@@ -15,7 +15,10 @@ class ResultsReader:
         self.fields = ["control",
                        "cumulative_points",
                        "time_split",
-                       "distance_travelled"]
+                       "distance",
+                       "cumulative_time",
+                       "cumulative_distance"
+                       ]
 
     def parse_txt_results_directory(self) -> "dict[str, pd.Dataframe]":
         """
@@ -28,7 +31,15 @@ class ResultsReader:
             filename = filepath.name
             team_number = filename.split("_")[0]
             if team_number not in results.keys():
-                results[team_number] = self._parse_txt_result(filepath)
+                result = self._parse_txt_result(filepath)
+
+                # calculate cumulative time
+                result["cumulative_time"] = result.time_split.cumsum()
+                
+                # calculate cumulative distance
+                result["cumulative_distance"] = result.distance.cumsum()
+
+                results[team_number] = result
 
         return results
 
@@ -36,7 +47,7 @@ class ResultsReader:
         """
         Parse an individual txt result file and return a pandas dataframe
         """
-        result = pd.DataFrame(columns=self.fields)
+        result = pd.DataFrame(columns=self.fields[:4])
 
         for line_num, line in enumerate(open(filepath)):
             # ignore first 3 lines, only descriptive info about file
