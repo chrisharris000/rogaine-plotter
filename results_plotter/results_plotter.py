@@ -12,7 +12,8 @@ class ResultsPlotter:
     def __init__(self, config: dict, results: "dict[str, pd.Dataframe]"):
         self.config = config
         self.results = results
-        self.map = cv2.imread(self.config["map_file"])
+        self.original_map = cv2.imread(self.config["map_file"])
+        self.canvas_map = self.original_map.copy()
 
     def plot_results(self) -> None:
         """
@@ -37,8 +38,9 @@ class ResultsPlotter:
             stats_width, stats_height = 800, 800
             stats_background = np.ones((stats_width, stats_height, 3))
             stats_background = self.add_stats_text(stats_background, curr_event_time)
+            self.canvas_map = self.add_teams_location(self.canvas_map, curr_event_time)
 
-            cv2.imshow(map_window_name, self.map)
+            cv2.imshow(map_window_name, self.canvas_map)
             cv2.imshow(stats_window_name, stats_background)
 
             k = cv2.waitKey(1) & 0xFF
@@ -47,6 +49,9 @@ class ResultsPlotter:
 
             curr_sim_time += dt
             curr_event_time += dt/scale
+
+            # reset canvas map
+            self.canvas_map = self.original_map.copy()
 
             time.sleep(dt)
 
@@ -113,12 +118,12 @@ class ResultsPlotter:
 
         return stats_background
     
-    def add_teams_location(self, map: np.ndarray, t: float) -> np.ndarray:
+    def add_teams_location(self, canvas_map: np.ndarray, t: float) -> np.ndarray:
         """
         Add team icons on map
 
         args:
-        - map: numpy array representing the rogaining map
+        - canvas_map: numpy array representing the rogaining map
         - t: float representing the time elapsed since the start of the simulation run
         """
-        pass
+        return canvas_map
