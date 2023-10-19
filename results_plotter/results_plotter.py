@@ -34,7 +34,7 @@ class ResultsPlotter:
 
         while curr_sim_time < sim_length:
             # start with blank canvas for stats
-            stats_width, stats_height = 750, 750
+            stats_width, stats_height = 800, 800
             stats_background = np.ones((stats_width, stats_height, 3))
             stats_background = self.add_stats_text(stats_background, curr_event_time)
 
@@ -81,16 +81,35 @@ class ResultsPlotter:
         
         # event duration clock
         event_elapsed_text = str(datetime.timedelta(seconds=curr_event_time))
-        cv2.putText(stats_background, f"Time since event started: {event_elapsed_text}", 
-                    (50, 150),
+        cv2.putText(stats_background, f"Time since event started: {event_elapsed_text} hrs", 
+                    (50, 100),
                     **stats_font_settings
                     )
 
         # cumulative points
+        cumulative_team_points = 0
+        cumulative_points_text = f"Team {self.config['team_number']} cumulative points: {cumulative_team_points}"
+        cv2.putText(stats_background, cumulative_points_text,
+                    (50, 150),
+                    **stats_font_settings
+                    )
 
         # leading team
+        leading_team_number = 0
+        leading_team_points = 0
+        leading_points_text = f"Leading team: {leading_team_number}, Cumulative points: {leading_team_points}"
+        cv2.putText(stats_background, leading_points_text,
+                    (50, 200),
+                    **stats_font_settings
+                    )
 
         # distance travelled
+        dist_travelled = 0
+        dist_travelled_text = f"Straight line distance travelled: {dist_travelled} km"
+        cv2.putText(stats_background, dist_travelled_text,
+                    (50, 250),
+                    **stats_font_settings
+                    )
 
         return stats_background
     
