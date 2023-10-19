@@ -35,6 +35,7 @@ class ResultsReader:
 
                 # calculate cumulative time
                 result["cumulative_time"] = result.time_split.cumsum()
+                result["cumulative_time"] = pd.to_timedelta(result["cumulative_time"])
                 
                 # calculate cumulative distance
                 result["cumulative_distance"] = result.distance.cumsum()
@@ -109,6 +110,7 @@ class ResultsReader:
         """
         result = pd.read_csv(filepath)
         result.time_split = pd.to_timedelta(result.time_split)
+        result.cumulative_time = pd.to_timedelta(result.cumulative_time)
         return result
 
     def write_csv_results(self, results: "dict[str, pd.Dataframe]") -> None:
