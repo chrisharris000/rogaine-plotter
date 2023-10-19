@@ -14,6 +14,7 @@ class ResultsPlotter:
         self.results = results
         self.original_map = cv2.imread(self.config["map_file"])
         self.canvas_map = self.original_map.copy()
+        breakpoint()
 
     def plot_results(self) -> None:
         """
@@ -57,7 +58,7 @@ class ResultsPlotter:
 
         cv2.destroyAllWindows()
 
-    def add_stats_text(self, stats_background: np.ndarray, curr_event_time: float) -> np.ndarray:
+    def add_stats_text(self, stats_background: np.ndarray, t_event: float) -> np.ndarray:
         """
         Add the text to be display on the stats window, including:
          - the title
@@ -68,7 +69,7 @@ class ResultsPlotter:
 
         args:
         - stats_background: numpy array representing the area that stats can be written onto
-        - curr_event_time: float representing seconds since start of event
+        - t_event: float representing seconds since start of event
         """
         stats_font_settings = {
             "fontFace": cv2.FONT_HERSHEY_SIMPLEX,
@@ -85,9 +86,17 @@ class ResultsPlotter:
                     )
         
         # event duration clock
-        event_elapsed_text = str(datetime.timedelta(seconds=curr_event_time))
+        event_elapsed_text = str(datetime.timedelta(seconds=t_event))
         cv2.putText(stats_background, f"Time since event started: {event_elapsed_text} hrs", 
                     (50, 100),
+                    **stats_font_settings
+                    )
+        
+        # distance travelled
+        dist_travelled = 0
+        dist_travelled_text = f"Straight line distance travelled: {dist_travelled} km"
+        cv2.putText(stats_background, dist_travelled_text,
+                    (50, 150),
                     **stats_font_settings
                     )
 
@@ -95,35 +104,54 @@ class ResultsPlotter:
         cumulative_team_points = 0
         cumulative_points_text = f"Team {self.config['team_number']} cumulative points: {cumulative_team_points}"
         cv2.putText(stats_background, cumulative_points_text,
-                    (50, 150),
-                    **stats_font_settings
-                    )
-
-        # leading team
-        leading_team_number = 0
-        leading_team_points = 0
-        leading_points_text = f"Leading team: {leading_team_number}, Cumulative points: {leading_team_points}"
-        cv2.putText(stats_background, leading_points_text,
                     (50, 200),
                     **stats_font_settings
                     )
 
-        # distance travelled
-        dist_travelled = 0
-        dist_travelled_text = f"Straight line distance travelled: {dist_travelled} km"
-        cv2.putText(stats_background, dist_travelled_text,
+        # top 3 teams
+        first_team_number = 0
+        first_team_points = 0
+        first_team_text = f"1st place: Team {first_team_number}, {first_team_points} pts"
+        cv2.putText(stats_background, first_team_text,
                     (50, 250),
+                    **stats_font_settings
+                    )
+        
+        second_team_number = 0
+        second_team_points = 0
+        second_team_text = f"2nd place: Team {second_team_number}, {second_team_points} pts"
+        cv2.putText(stats_background, second_team_text,
+                    (50, 300),
+                    **stats_font_settings
+                    )
+        
+        third_team_number = 0
+        third_team_points = 0
+        third_team_text = f"3rd place: Team {third_team_number}, {third_team_points} pts"
+        cv2.putText(stats_background, third_team_text,
+                    (50, 350),
                     **stats_font_settings
                     )
 
         return stats_background
     
-    def add_teams_location(self, canvas_map: np.ndarray, t: float) -> np.ndarray:
+    def add_teams_location(self, canvas_map: np.ndarray, t_event: float) -> np.ndarray:
         """
         Add team icons on map
 
         args:
         - canvas_map: numpy array representing the rogaining map
-        - t: float representing the time elapsed since the start of the simulation run
+        - t_event: float representing the seconds elapsed since the start of the event
         """
         return canvas_map
+    
+    def _get_leading_team(self, t_event: float) -> dict:
+        """
+        Return teams ordered by points at time t_event seconds in event
+
+        args
+        - t_event: float representing seconds elapsed since start of the event
+        """
+        # points = {}
+        # for team_number, result in self.results.items():
+        #     points[team_number] = result
