@@ -80,13 +80,15 @@ class ResultsPlotter:
         }
 
         # stats page title
-        cv2.putText(stats_background, f"Stats for team {self.config['team_number']}", 
+        team_number = self.config["team_number"]
+        cv2.putText(stats_background, f"Stats for team {team_number}", 
                     (50, 50),
                     **stats_font_settings
                     )
         
         # event duration clock
-        event_elapsed_text = str(datetime.timedelta(seconds=t_event))
+        t_event_timedelta = datetime.timedelta(seconds=t_event)
+        event_elapsed_text = str(t_event_timedelta)
         cv2.putText(stats_background, f"Time since event started: {event_elapsed_text} hrs", 
                     (50, 100),
                     **stats_font_settings
@@ -94,7 +96,16 @@ class ResultsPlotter:
         
         # distance travelled
         dist_travelled = 0
-        dist_travelled_text = f"Straight line distance travelled: {dist_travelled} km"
+        # rows for which at a given t_event time into the event, have already passed
+        team_result = self.results[team_number]
+        controls_reached = team_result[team_result.cumulative_time < t_event_timedelta]
+        # get most recent row
+        recent_control_row = controls_reached.tail(1)
+        if not recent_control_row.empty:
+            dist_travelled = recent_control_row.cumulative_distance.values[0]
+        else:
+            dist_travelled = 0
+        dist_travelled_text = f"Straight line distance travelled: {dist_travelled:.2f} km"
         cv2.putText(stats_background, dist_travelled_text,
                     (50, 150),
                     **stats_font_settings
@@ -126,13 +137,13 @@ class ResultsPlotter:
         # cumulative points
         overall_position = 0
         cumulative_points = 0
-        for position, (team_number, points) in enumerate(sorted_team_points):
-            if team_number == str(self.config["team_number"]):
+        for position, (sorted_team_number, sorted_points) in enumerate(sorted_team_points):
+            if sorted_team_number == team_number:
                 overall_position = position + 1
-                cumulative_points = points
+                cumulative_points = sorted_points
         
         position_text = position_to_text(overall_position)
-        cumulative_points_text = f"{position_text} place: Team {self.config['team_number']}, {cumulative_points} pts"
+        cumulative_points_text = f"{position_text} place: Team {team_number}, {cumulative_points} pts"
         cv2.putText(stats_background, cumulative_points_text,
                     (50, 350),
                     **stats_font_settings
