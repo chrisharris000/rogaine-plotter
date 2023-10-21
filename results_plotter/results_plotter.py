@@ -1,4 +1,5 @@
 import datetime
+import re
 import time
 
 import cv2
@@ -99,33 +100,40 @@ class ResultsPlotter:
                     **stats_font_settings
                     )
 
-        # cumulative points
-        cumulative_team_points = 0
-        cumulative_points_text = f"Team {self.config['team_number']} cumulative points: {cumulative_team_points}"
-        cv2.putText(stats_background, cumulative_points_text,
-                    (50, 200),
-                    **stats_font_settings
-                    )
-
         # top 3 teams
         sorted_team_points = self._get_leading_team(t_event)
         first_team_number, first_team_points = sorted_team_points[0]
         first_team_text = f"1st place: Team {first_team_number}, {first_team_points} pts"
         cv2.putText(stats_background, first_team_text,
-                    (50, 250),
+                    (50, 200),
                     **stats_font_settings
                     )
         
         second_team_number, second_team_points = sorted_team_points[1]
         second_team_text = f"2nd place: Team {second_team_number}, {second_team_points} pts"
         cv2.putText(stats_background, second_team_text,
-                    (50, 300),
+                    (50, 250),
                     **stats_font_settings
                     )
         
         third_team_number, third_team_points = sorted_team_points[2]
         third_team_text = f"3rd place: Team {third_team_number}, {third_team_points} pts"
         cv2.putText(stats_background, third_team_text,
+                    (50, 300),
+                    **stats_font_settings
+                    )
+        
+        # cumulative points
+        overall_position = 0
+        cumulative_points = 0
+        for position, (team_number, points) in enumerate(sorted_team_points):
+            if team_number == str(self.config["team_number"]):
+                overall_position = position + 1
+                cumulative_points = points
+        
+        position_text = position_to_text(overall_position)
+        cumulative_points_text = f"{position_text} place: Team {self.config['team_number']}, {cumulative_points} pts"
+        cv2.putText(stats_background, cumulative_points_text,
                     (50, 350),
                     **stats_font_settings
                     )
@@ -164,3 +172,82 @@ class ResultsPlotter:
 
         sorted_by_points = list(reversed(sorted(team_points, key=lambda tup: tup[1])))
         return sorted_by_points
+    
+def position_to_text(num: int) -> str:
+    """
+    Convert a given position to its text representation
+    e.g.
+    1 -> "1st"
+    2 -> "2nd"
+    3 -> "3rd"
+    4 -> "4th"
+
+    Source: https://pypi.org/project/inflect/
+    """
+    # if position % 10 == 1 and position != 11:
+    #     position_text = f"{position}st"
+
+    # elif position == 11:
+    #     position_text = f"{position}th"
+
+
+    # return position_text
+    DIGIT = re.compile(r"\d")
+    nth = {
+        0: "th",
+        1: "st",
+        2: "nd",
+        3: "rd",
+        4: "th",
+        5: "th",
+        6: "th",
+        7: "th",
+        8: "th",
+        9: "th",
+        11: "th",
+        12: "th",
+        13: "th",
+    }
+    ordinal = dict(
+        ty="tieth",
+        one="first",
+        two="second",
+        three="third",
+        five="fifth",
+        eight="eighth",
+        nine="ninth",
+        twelve="twelfth",
+    )
+    ordinal_suff = re.compile(fr"({'|'.join(ordinal)})\Z")
+
+    
+    if DIGIT.match(str(num)):
+        if isinstance(num, (float, int)) and int(num) == num:
+            n = int(num)
+        else:
+            if "." in str(num):
+                try:
+                    # numbers after decimal,
+                    # so only need last one for ordinal
+                    n = int(str(num)[-1])
+
+                except ValueError:  # ends with '.', so need to use whole string
+                    n = int(str(num)[:-1])
+            else:
+                n = int(num)  # type: ignore
+        try:
+            post = nth[n % 100]
+        except KeyError:
+            post = nth[n % 10]
+        return f"{num}{post}"
+    else:
+        # Mad props to Damian Conway (?) whose ordinal()
+        # algorithm is type-bendy enough to foil MyPy
+        str_num: str = num  # type: ignore[assignment]
+        mo = ordinal_suff.search(str_num)
+        if mo:
+            post = ordinal[mo.group(1)]
+            rval = ordinal_suff.sub(post, str_num)
+        else:
+            rval = f"{str_num}th"
+        return rval
