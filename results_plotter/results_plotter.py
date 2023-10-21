@@ -14,7 +14,6 @@ class ResultsPlotter:
         self.results = results
         self.original_map = cv2.imread(self.config["map_file"])
         self.canvas_map = self.original_map.copy()
-        breakpoint()
 
     def plot_results(self) -> None:
         """
@@ -109,24 +108,22 @@ class ResultsPlotter:
                     )
 
         # top 3 teams
-        first_team_number = 0
-        first_team_points = 0
+        sorted_team_points = self._get_leading_team(t_event)
+        first_team_number, first_team_points = sorted_team_points[0]
         first_team_text = f"1st place: Team {first_team_number}, {first_team_points} pts"
         cv2.putText(stats_background, first_team_text,
                     (50, 250),
                     **stats_font_settings
                     )
         
-        second_team_number = 0
-        second_team_points = 0
+        second_team_number, second_team_points = sorted_team_points[1]
         second_team_text = f"2nd place: Team {second_team_number}, {second_team_points} pts"
         cv2.putText(stats_background, second_team_text,
                     (50, 300),
                     **stats_font_settings
                     )
         
-        third_team_number = 0
-        third_team_points = 0
+        third_team_number, third_team_points = sorted_team_points[2]
         third_team_text = f"3rd place: Team {third_team_number}, {third_team_points} pts"
         cv2.putText(stats_background, third_team_text,
                     (50, 350),
@@ -152,6 +149,18 @@ class ResultsPlotter:
         args
         - t_event: float representing seconds elapsed since start of the event
         """
-        # points = {}
-        # for team_number, result in self.results.items():
-        #     points[team_number] = result
+        team_points = []
+        for team_number, result in self.results.items():
+            t_event_timedelta = datetime.timedelta(seconds=t_event)
+            # rows for which at a given t_event time into the event, have already passed
+            elapsed_times_rows = result[result.cumulative_time < t_event_timedelta]
+            # get most recent row
+            recent_elapsed_row = elapsed_times_rows.tail(1)
+            if not recent_elapsed_row.empty:
+                points = recent_elapsed_row.cumulative_points.values[0]
+            else:
+                points = 0
+            team_points.append(tuple([team_number, points]))
+
+        sorted_by_points = list(reversed(sorted(team_points, key=lambda tup: tup[1])))
+        return sorted_by_points
