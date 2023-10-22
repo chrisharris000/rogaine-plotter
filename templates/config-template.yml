@@ -6,4 +6,6 @@ event_name: "X hr Rogaining Event"  # name of rogaining event to be display as t
 results_directory: "path/to/directory"  # path to directory containing results of event
 map_file: "path/to/file"  # path to pdf of map
 control_coordinates: "path/to/file" # path to csv of pixel coordinates of map controls
+leg_statistics: "path/to/file"  # path to txt of leg statistics
+control_statistics: "path/to/file"  # path to txt of control statistics
 map_scale_pixels: "1:100" # scale of how many pixels to metres e.g. 1 pixel = 100 metres
