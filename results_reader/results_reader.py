@@ -138,3 +138,33 @@ class ResultsReader:
         dist_km = (dist_pixels / ratio) / 1000
         
         return dist_km
+    
+    def parse_control_statistics_txt(self) -> pd.DataFrame:
+        """
+        Parse a txt file containing the control statistics for the event and return a pandas dataframe
+        """
+        control_statistics = pd.DataFrame(columns=["control", "visit_count"])
+        for line_num, line in enumerate(open(self.config["control_statistics"], "r")):
+            if line_num == 0:
+                continue
+            
+            line = line.split()
+            if len(line[0]) == 2:
+                entry = [line[0], line[1]]
+                control_statistics.loc[len(control_statistics)] = entry
+        return control_statistics
+    
+    def parse_control_statistics_csv(self) -> pd.DataFrame:
+        """
+        Parse a csv file containing the control statistics for the event and return a pandas dataframe
+        """
+        control_statistics = pd.read_csv(self.config["control_statistics"])
+        return control_statistics
+    
+    def write_control_statistics_csv(self, control_statistics: pd.DataFrame, save_directory: Path) -> None:
+        """
+        Write the control statistics dataframe as a csv file
+        """
+        filename = f"control-statistics.csv"
+        filepath = save_directory / filename
+        control_statistics.to_csv(filepath, index=False)
