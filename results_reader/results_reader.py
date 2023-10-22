@@ -168,3 +168,33 @@ class ResultsReader:
         filename = f"control-statistics.csv"
         filepath = save_directory / filename
         control_statistics.to_csv(filepath, index=False)
+
+    def parse_leg_statistics_txt(self) -> pd.DataFrame:
+        """
+        Parse a txt file containing the leg statistics for the event and return a pandas dataframe
+        """
+        leg_statistics = pd.DataFrame(columns=["leg", "leg_count"])
+        for line_num, line in enumerate(open(self.config["leg_statistics"], "r")):
+            if line_num == 0:
+                continue
+            
+            line = line.split()
+            if len(line[0]) == 5:
+                entry = [line[0], line[1]]
+                leg_statistics.loc[len(leg_statistics)] = entry
+        return leg_statistics
+    
+    def parse_leg_statistics_csv(self) -> pd.DataFrame:
+        """
+        Parse a csv file containing the leg statistics for the event and return a pandas dataframe
+        """
+        leg_statistics = pd.read_csv(self.config["leg_statistics"])
+        return leg_statistics
+    
+    def write_leg_statistics_csv(self, leg_statistics: pd.DataFrame, save_directory: Path) -> None:
+        """
+        Write the leg statistics dataframe as a csv file
+        """
+        filename = f"leg-statistics.csv"
+        filepath = save_directory / filename
+        leg_statistics.to_csv(filepath, index=False)
