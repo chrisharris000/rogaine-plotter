@@ -12,10 +12,14 @@ class ResultsPlotter:
     """
     Open map and display teams moving around map and summary stats
     """
-    def __init__(self, config: dict, results: "dict[str, pd.Dataframe]", control_coordinates: "dict[str, PixelCoordinate]"):
+    def __init__(self, config: dict,
+                 results: "dict[str, pd.Dataframe]",
+                 control_coordinates: "dict[str, PixelCoordinate]",
+                 leg_statistics: pd.DataFrame):
         self.config = config
         self.results = results
         self.control_coordinates = control_coordinates
+        self.leg_statistics = leg_statistics
         self.original_map = cv2.imread(self.config["map_file"])
         self.canvas_map = self.original_map.copy()
 
@@ -284,6 +288,51 @@ class ResultsPlotter:
 
             cv2.putText(img=canvas_map, org=text_origin, color=(255, 255, 255), **team_font_settings)
         return canvas_map
+    
+    def display_leg_stats(self):
+        """
+        Open window and display legs stats after main replay is complete
+        """
+        leg_stats_window_name = "Leg Statistics"
+        cv2.namedWindow(leg_stats_window_name, cv2.WINDOW_NORMAL)
+
+        leg_stats = self.leg_statistics.set_index("leg")["leg_count"].to_dict()
+        for leg, visit_count in leg_stats.items():
+            self.canvas_map = self.add_control_locations(self.canvas_map, -1)
+
+            start_control, end_control = leg.split(":")
+
+            start_control_px = self.control_coordinates[start_control]
+            end_control_px = self.control_coordinates[end_control]
+
+            cv2.arrowedLine(self.canvas_map,
+                            (start_control_px.x, start_control_px.y),
+                            (end_control_px.x, end_control_px.y),
+                            color=(0, 0, 0),
+                            thickness=5)
+            
+            midpoint = (
+                int((start_control_px.x + end_control_px.x) / 2),
+                int((start_control_px.y + end_control_px.y) / 2)
+            )
+            visit_font_settings = {
+                "fontFace": cv2.FONT_HERSHEY_SIMPLEX,
+                "fontScale": 1.5,
+                "color": (255, 255, 0),
+                "thickness": 4,
+                "lineType": 2
+            }
+            cv2.putText(self.canvas_map, str(visit_count), midpoint, **visit_font_settings)
+            
+            time.sleep(1)
+
+            cv2.imshow(leg_stats_window_name, self.canvas_map)
+
+            # reset canvas map
+            self.canvas_map = self.original_map.copy()
+            k = cv2.waitKey(1) & 0xFF
+            if k == 27:
+                break
     
 def position_to_text(num: int) -> str:
     """
