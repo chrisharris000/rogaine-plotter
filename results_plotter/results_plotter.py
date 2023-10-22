@@ -216,7 +216,11 @@ class ResultsPlotter:
             interp_pt_px_y = prev_control_px.y + ((next_control_px.y - prev_control_px.y) * time_frac)
             interpolated_pt_px = PixelCoordinate(int(interp_pt_px_x), int(interp_pt_px_y))
 
-            cv2.circle(canvas_map, (interpolated_pt_px.x, interpolated_pt_px.y), 20, (0, 0, 0), -1)
+            circle_colour = (0, 0, 0)
+            if team == self.config["team_number"]:
+                circle_colour = (0, 120, 50)
+
+            cv2.circle(canvas_map, (interpolated_pt_px.x, interpolated_pt_px.y), 20, circle_colour, -1)
             team_font_settings = {
                 "text": team,
                 "fontFace": cv2.FONT_HERSHEY_SIMPLEX,
