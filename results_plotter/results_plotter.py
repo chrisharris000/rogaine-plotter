@@ -216,7 +216,18 @@ class ResultsPlotter:
             interp_pt_px_y = prev_control_px.y + ((next_control_px.y - prev_control_px.y) * time_frac)
             interpolated_pt_px = PixelCoordinate(int(interp_pt_px_x), int(interp_pt_px_y))
 
-            cv2.circle(canvas_map, (interpolated_pt_px.x, interpolated_pt_px.y), 10, (255, 0, 0), -1)
+            cv2.circle(canvas_map, (interpolated_pt_px.x, interpolated_pt_px.y), 20, (0, 0, 0), -1)
+            team_font_settings = {
+                "text": team,
+                "fontFace": cv2.FONT_HERSHEY_SIMPLEX,
+                "fontScale": 1,
+                "thickness": 2,
+            }
+
+            text_size, _ = cv2.getTextSize(**team_font_settings)
+            text_origin = (int(interpolated_pt_px.x - text_size[0] / 2), int(interpolated_pt_px.y + text_size[1] / 2))
+
+            cv2.putText(img=canvas_map, org=text_origin, color=(255, 255, 255), **team_font_settings)
 
         return canvas_map
     
