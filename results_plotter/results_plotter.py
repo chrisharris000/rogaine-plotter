@@ -43,6 +43,7 @@ class ResultsPlotter:
             stats_background = np.ones((stats_width, stats_height, 3))
             stats_background = self.add_stats_text(stats_background, curr_event_time)
             self.canvas_map = self.add_teams_location(self.canvas_map, curr_event_time)
+            self.canvas_map = self.add_control_locations(self.canvas_map, curr_event_time)
 
             cv2.imshow(map_window_name, self.canvas_map)
             cv2.imshow(stats_window_name, stats_background)
@@ -258,6 +259,32 @@ class ResultsPlotter:
         sorted_by_points = list(reversed(sorted(team_points, key=lambda tup: tup[1])))
         return sorted_by_points
     
+    def add_control_locations(self, canvas_map: np.ndarray, t_event: float) -> np.ndarray:
+        """
+        Add circles over the control locations
+        Circles change colour as controls are visited more often
+
+        args:
+        - canvas_map: numpy array representing the rogaining map
+        - t_event: float representing the seconds elapsed since the start of the event
+        """
+        for control, coordinate in self.control_coordinates.items():
+            circle_colour = (255, 0, 0)
+
+            cv2.circle(canvas_map, (coordinate.x, coordinate.y), 20, circle_colour, -1)
+            team_font_settings = {
+                "text": control,
+                "fontFace": cv2.FONT_HERSHEY_SIMPLEX,
+                "fontScale": 1,
+                "thickness": 2,
+            }
+
+            text_size, _ = cv2.getTextSize(**team_font_settings)
+            text_origin = (int(coordinate.x - text_size[0] / 2), int(coordinate.y + text_size[1] / 2))
+
+            cv2.putText(img=canvas_map, org=text_origin, color=(255, 255, 255), **team_font_settings)
+        return canvas_map
+    
 def position_to_text(num: int) -> str:
     """
     Convert a given position to its text representation
@@ -269,14 +296,6 @@ def position_to_text(num: int) -> str:
 
     Source: https://pypi.org/project/inflect/
     """
-    # if position % 10 == 1 and position != 11:
-    #     position_text = f"{position}st"
-
-    # elif position == 11:
-    #     position_text = f"{position}th"
-
-
-    # return position_text
     DIGIT = re.compile(r"\d")
     nth = {
         0: "th",
