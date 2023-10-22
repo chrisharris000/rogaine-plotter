@@ -20,9 +20,11 @@ class ControlCoordinatesReader:
         Source: https://www.tutorialspoint.com/opencv-python-how-to-display-the-coordinates-of-points-clicked-on-an-image
         """
         if event == cv2.EVENT_LBUTTONDOWN:
-            control_id = easygui.enterbox("Enter Control ID e.g. HH, 20, 57, etc", "Control ID Input", "")
+            msg = "Enter Control ID e.g. HH, 20, 57, etc"
+            box_title = "Control ID Input"
+            control_id = easygui.enterbox(msg, box_title, "")
             self.coordinates[control_id] = PixelCoordinate(x, y)
-            
+
             # draw point on the image
             cv2.circle(self.map, (x,y), 10, (0, 0, 255), -1)
 
@@ -73,7 +75,7 @@ class ScaleReader:
 
             else:
                 self.scale_end = PixelCoordinate(x, y)
-            
+
             # draw point on the image
             cv2.circle(self.map, (x,y), 10, (255, 0, 0), -1)
 

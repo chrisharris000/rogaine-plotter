@@ -30,13 +30,13 @@ class ResultsReader:
         for filepath in Path(self.config["results_directory"]).glob(file_pattern):
             filename = filepath.name
             team_number = filename.split("_")[0]
-            if team_number not in results.keys():
+            if team_number not in results:
                 result = self._parse_txt_result(filepath)
 
                 # calculate cumulative time
                 result["cumulative_time"] = result.time_split.cumsum()
                 result["cumulative_time"] = pd.to_timedelta(result["cumulative_time"])
-                
+
                 # calculate cumulative distance
                 result["cumulative_distance"] = result.distance.cumsum()
 
@@ -99,7 +99,7 @@ class ResultsReader:
         for filepath in Path(self.config["results_directory"]).glob(file_pattern):
             filename = filepath.name
             team_number = filename.split("_")[0]
-            if team_number not in results.keys():
+            if team_number not in results:
                 results[team_number] = self._parse_csv_result(filepath)
 
         return results
@@ -136,9 +136,9 @@ class ResultsReader:
         scale_str = self.config["map_scale_pixels"].split(":")
         ratio = int(scale_str[0]) / int(scale_str[1])
         dist_km = (dist_pixels / ratio) / 1000
-        
+
         return dist_km
-    
+
     def parse_control_statistics_txt(self) -> pd.DataFrame:
         """
         Parse a txt file containing the control statistics for the event and return a pandas dataframe
@@ -147,20 +147,20 @@ class ResultsReader:
         for line_num, line in enumerate(open(self.config["control_statistics"], "r")):
             if line_num == 0:
                 continue
-            
+
             line = line.split()
             if len(line[0]) == 2:
                 entry = [line[0], line[1]]
                 control_statistics.loc[len(control_statistics)] = entry
         return control_statistics
-    
+
     def parse_control_statistics_csv(self) -> pd.DataFrame:
         """
         Parse a csv file containing the control statistics for the event and return a pandas dataframe
         """
         control_statistics = pd.read_csv(self.config["control_statistics"])
         return control_statistics
-    
+
     def write_control_statistics_csv(self, control_statistics: pd.DataFrame, save_directory: Path) -> None:
         """
         Write the control statistics dataframe as a csv file
@@ -177,20 +177,20 @@ class ResultsReader:
         for line_num, line in enumerate(open(self.config["leg_statistics"], "r")):
             if line_num == 0:
                 continue
-            
+
             line = line.split()
             if len(line[0]) == 5:
                 entry = [line[0], line[1]]
                 leg_statistics.loc[len(leg_statistics)] = entry
         return leg_statistics
-    
+
     def parse_leg_statistics_csv(self) -> pd.DataFrame:
         """
         Parse a csv file containing the leg statistics for the event and return a pandas dataframe
         """
         leg_statistics = pd.read_csv(self.config["leg_statistics"])
         return leg_statistics
-    
+
     def write_leg_statistics_csv(self, leg_statistics: pd.DataFrame, save_directory: Path) -> None:
         """
         Write the leg statistics dataframe as a csv file

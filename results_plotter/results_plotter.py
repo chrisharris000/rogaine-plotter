@@ -37,7 +37,8 @@ class ResultsPlotter:
         sim_length = self.config["replay_length"]*60 # secs
         curr_event_time = 0.0   # hrs
         event_length = self.config["event_length"]  # hours
-        scale = (sim_length/3600) / (event_length + 0.5)    # unitless, + 0.5 to account for late arrivals
+        # scale: unitless, + 0.5 to account for late arrivals
+        scale = (sim_length/3600) / (event_length + 0.5)
         fps = 15    # frames per sec
         dt = 1/fps
 
@@ -89,19 +90,19 @@ class ResultsPlotter:
 
         # stats page title
         team_number = self.config["team_number"]
-        cv2.putText(stats_background, f"Stats for team {team_number}", 
+        cv2.putText(stats_background, f"Stats for team {team_number}",
                     (50, 50),
                     **stats_font_settings
                     )
-        
+
         # event duration clock
         t_event_timedelta = datetime.timedelta(seconds=t_event)
         event_elapsed_text = str(t_event_timedelta)
-        cv2.putText(stats_background, f"Time since event started: {event_elapsed_text} hrs", 
+        cv2.putText(stats_background, f"Time since event started: {event_elapsed_text} hrs",
                     (50, 100),
                     **stats_font_settings
                     )
-        
+
         # distance travelled
         dist_travelled = 0
         # rows for which at a given t_event time into the event, have already passed
@@ -127,21 +128,21 @@ class ResultsPlotter:
                     (50, 200),
                     **stats_font_settings
                     )
-        
+
         second_team_number, second_team_points = sorted_team_points[1]
         second_team_text = f"2nd place: Team {second_team_number}, {second_team_points} pts"
         cv2.putText(stats_background, second_team_text,
                     (50, 250),
                     **stats_font_settings
                     )
-        
+
         third_team_number, third_team_points = sorted_team_points[2]
         third_team_text = f"3rd place: Team {third_team_number}, {third_team_points} pts"
         cv2.putText(stats_background, third_team_text,
                     (50, 300),
                     **stats_font_settings
                     )
-        
+
         # cumulative points
         overall_position = 0
         cumulative_points = 0
@@ -149,7 +150,7 @@ class ResultsPlotter:
             if sorted_team_number == team_number:
                 overall_position = position + 1
                 cumulative_points = sorted_points
-        
+
         position_text = position_to_text(overall_position)
         cumulative_points_text = f"{position_text} place: Team {team_number}, {cumulative_points} pts"
         cv2.putText(stats_background, cumulative_points_text,
@@ -158,7 +159,7 @@ class ResultsPlotter:
                     )
 
         return stats_background
-    
+
     def add_teams_location(self, canvas_map: np.ndarray, t_event: float) -> np.ndarray:
         """
         Add team icons on map
@@ -205,7 +206,7 @@ class ResultsPlotter:
 
             # get next control
             next_control = next_control_row.control.values[0]
-            
+
             prev_control_px = self.control_coordinates[prev_control]
             next_control_px = self.control_coordinates[next_control]
 
@@ -239,7 +240,7 @@ class ResultsPlotter:
             cv2.putText(img=canvas_map, org=text_origin, color=(255, 255, 255), **team_font_settings)
 
         return canvas_map
-    
+
     def _get_leading_team(self, t_event: float) -> dict:
         """
         Return teams ordered by points at time t_event seconds in event
@@ -262,7 +263,7 @@ class ResultsPlotter:
 
         sorted_by_points = list(reversed(sorted(team_points, key=lambda tup: tup[1])))
         return sorted_by_points
-    
+
     def add_control_locations(self, canvas_map: np.ndarray, t_event: float) -> np.ndarray:
         """
         Add circles over the control locations
@@ -288,7 +289,7 @@ class ResultsPlotter:
 
             cv2.putText(img=canvas_map, org=text_origin, color=(255, 255, 255), **team_font_settings)
         return canvas_map
-    
+
     def display_leg_stats(self):
         """
         Open window and display legs stats after main replay is complete
@@ -310,7 +311,7 @@ class ResultsPlotter:
                             (end_control_px.x, end_control_px.y),
                             color=(0, 0, 0),
                             thickness=5)
-            
+
             midpoint = (
                 int((start_control_px.x + end_control_px.x) / 2),
                 int((start_control_px.y + end_control_px.y) / 2)
@@ -323,7 +324,7 @@ class ResultsPlotter:
                 "lineType": 2
             }
             cv2.putText(self.canvas_map, str(visit_count), midpoint, **visit_font_settings)
-            
+
             time.sleep(1)
 
             cv2.imshow(leg_stats_window_name, self.canvas_map)
@@ -333,7 +334,7 @@ class ResultsPlotter:
             k = cv2.waitKey(1) & 0xFF
             if k == 27:
                 break
-    
+
 def position_to_text(num: int) -> str:
     """
     Convert a given position to its text representation
@@ -373,7 +374,6 @@ def position_to_text(num: int) -> str:
     )
     ordinal_suff = re.compile(fr"({'|'.join(ordinal)})\Z")
 
-    
     if DIGIT.match(str(num)):
         if isinstance(num, (float, int)) and int(num) == num:
             n = int(num)
