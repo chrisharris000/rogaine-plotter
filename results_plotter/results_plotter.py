@@ -6,13 +6,16 @@ import cv2
 import numpy as np
 import pandas as pd
 
+from utils import PixelCoordinate
+
 class ResultsPlotter:
     """
     Open map and display teams moving around map and summary stats
     """
-    def __init__(self, config: dict, results: "dict[str, pd.Dataframe]"):
+    def __init__(self, config: dict, results: "dict[str, pd.Dataframe]", control_coordinates: "dict[str, PixelCoordinate]"):
         self.config = config
         self.results = results
+        self.control_coordinates = control_coordinates
         self.original_map = cv2.imread(self.config["map_file"])
         self.canvas_map = self.original_map.copy()
 
@@ -159,6 +162,62 @@ class ResultsPlotter:
         - canvas_map: numpy array representing the rogaining map
         - t_event: float representing the seconds elapsed since the start of the event
         """
+        t_event_timedelta = datetime.timedelta(seconds=t_event)
+        for team, result in self.results.items():
+            df = result
+
+            prev_control = ""
+            next_control = ""
+            controls_reached = df[df.cumulative_time < t_event_timedelta]
+            # get most recent row
+            recent_control_row = controls_reached.tail(1)
+
+            # get previous control
+            if not recent_control_row.empty:
+                prev_control_row = recent_control_row
+            else:
+                prev_control_row = pd.DataFrame(
+                    [["HH",  # control
+                    0, # cumulative_points
+                    datetime.timedelta(seconds=0), # time_split
+                    0.0, # distance
+                    datetime.timedelta(seconds=0), # cumulative_time
+                    0.0]],    # cumulative_distance
+                    columns=["control", "cumulative_points", "time_split", "distance", "cumulative_time", "cumulative_distance"])
+
+            prev_control = prev_control_row.control.values[0]
+
+            # get next control index
+            prev_control_idx = -1
+            if not recent_control_row.empty:
+                prev_control_idx = recent_control_row.index.values[0]
+
+            # get next control row
+            if prev_control_idx + 1 < len(df):
+                next_control_row = df.iloc[[prev_control_idx + 1]]
+            else:
+                next_control_row = df.iloc[[-1]]
+
+            # get next control
+            next_control = next_control_row.control.values[0]
+            
+            prev_control_px = self.control_coordinates[prev_control]
+            next_control_px = self.control_coordinates[next_control]
+
+            t_event_timedelta_np = np.array([t_event_timedelta], dtype="timedelta64[ms]")[0]
+            total_time_split_between_controls = next_control_row.time_split.values[0]
+            time_start_at_prev_control = prev_control_row.cumulative_time.values[0]
+            curr_time_delta_between_controls = t_event_timedelta_np - time_start_at_prev_control
+            if total_time_split_between_controls != np.timedelta64(0):
+                time_frac = curr_time_delta_between_controls / total_time_split_between_controls
+            else:
+                time_frac = 0
+            interp_pt_px_x = prev_control_px.x + ((next_control_px.x - prev_control_px.x) * time_frac)
+            interp_pt_px_y = prev_control_px.y + ((next_control_px.y - prev_control_px.y) * time_frac)
+            interpolated_pt_px = PixelCoordinate(int(interp_pt_px_x), int(interp_pt_px_y))
+
+            cv2.circle(canvas_map, (interpolated_pt_px.x, interpolated_pt_px.y), 10, (255, 0, 0), -1)
+
         return canvas_map
     
     def _get_leading_team(self, t_event: float) -> dict:
