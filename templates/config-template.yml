@@ -1,7 +1,6 @@
 ---
 team_number: "1" # team number to make focus of statistics
 event_length: 12.0  # hours, total time of rogaining event
-event_name: "X hr Rogaining Event"  # name of rogaining event to be display as title
 results_directory: "path/to/directory"  # path to directory containing results of event
 map_file: "path/to/file"  # path to pdf of map
 control_coordinates: "path/to/file" # path to csv of pixel coordinates of map controls
