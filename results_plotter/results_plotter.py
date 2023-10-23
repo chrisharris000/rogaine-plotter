@@ -35,12 +35,12 @@ class ResultsPlotter:
         cv2.namedWindow(stats_window_name, cv2.WINDOW_NORMAL)
 
         curr_sim_time = 0.0 # secs
-        sim_length = self.config["replay_length"]*60 # secs
+        sim_length = 30 # secs
         curr_event_time = 0.0   # hrs
         event_length = self.config["event_length"]  # hours
         # scale: unitless, + 0.5 to account for late arrivals
         scale = (sim_length/3600) / (event_length + 0.5)
-        fps = 15    # frames per sec
+        fps = 20    # frames per sec
         dt = 1/fps
 
         while curr_sim_time < sim_length:
