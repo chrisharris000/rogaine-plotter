@@ -22,6 +22,7 @@ class ResultsPlotter:
         self.leg_statistics = leg_statistics
         self.original_map = cv2.imread(self.config["map_file"])
         self.canvas_map = self.original_map.copy()
+        self.sorted_team_points = []
 
     def plot_results(self) -> None:
         """
@@ -121,22 +122,23 @@ class ResultsPlotter:
                     )
 
         # top 3 teams
-        sorted_team_points = self._get_leading_team(t_event)
-        first_team_number, first_team_points = sorted_team_points[0]
+        self.sorted_team_points = self._get_leading_team(t_event)
+
+        first_team_number, first_team_points = self.sorted_team_points[0]
         first_team_text = f"1st place: Team {first_team_number}, {first_team_points} pts"
         cv2.putText(stats_background, first_team_text,
                     (50, 200),
                     **stats_font_settings
                     )
 
-        second_team_number, second_team_points = sorted_team_points[1]
+        second_team_number, second_team_points = self.sorted_team_points[1]
         second_team_text = f"2nd place: Team {second_team_number}, {second_team_points} pts"
         cv2.putText(stats_background, second_team_text,
                     (50, 250),
                     **stats_font_settings
                     )
 
-        third_team_number, third_team_points = sorted_team_points[2]
+        third_team_number, third_team_points = self.sorted_team_points[2]
         third_team_text = f"3rd place: Team {third_team_number}, {third_team_points} pts"
         cv2.putText(stats_background, third_team_text,
                     (50, 300),
@@ -146,7 +148,7 @@ class ResultsPlotter:
         # cumulative points
         overall_position = 0
         cumulative_points = 0
-        for position, (sorted_team_number, sorted_points) in enumerate(sorted_team_points):
+        for position, (sorted_team_number, sorted_points) in enumerate(self.sorted_team_points):
             if sorted_team_number == team_number:
                 overall_position = position + 1
                 cumulative_points = sorted_points
@@ -225,6 +227,12 @@ class ResultsPlotter:
             circle_colour = (0, 0, 0)
             if team == self.config["team_number"]:
                 circle_colour = (0, 120, 50)
+            elif team == self.sorted_team_points[0][0]:
+                circle_colour = (0, 221, 255)
+            elif team == self.sorted_team_points[1][0]:
+                circle_colour = (173, 169, 170)
+            elif team == self.sorted_team_points[2][0]:
+                circle_colour = (50, 127, 205)
 
             cv2.circle(canvas_map, (interpolated_pt_px.x, interpolated_pt_px.y), 20, circle_colour, -1)
             team_font_settings = {
@@ -241,7 +249,7 @@ class ResultsPlotter:
 
         return canvas_map
 
-    def _get_leading_team(self, t_event: float) -> dict:
+    def _get_leading_team(self, t_event: float) -> "list[tuple[str, int]]":
         """
         Return teams ordered by points at time t_event seconds in event
 
