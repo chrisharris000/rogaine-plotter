@@ -48,7 +48,7 @@ class ResultsPlotter:
             stats_background = np.ones((stats_width, stats_height, 3))
             stats_background = self.add_stats_text(stats_background, curr_event_time)
             self.canvas_map = self.add_teams_location(self.canvas_map, curr_event_time)
-            self.canvas_map = self.add_control_locations(self.canvas_map, curr_event_time)
+            self.canvas_map = self.add_control_locations(self.canvas_map)
 
             cv2.imshow(map_window_name, self.canvas_map)
             cv2.imshow(stats_window_name, stats_background)
@@ -264,10 +264,9 @@ class ResultsPlotter:
         sorted_by_points = list(reversed(sorted(team_points, key=lambda tup: tup[1])))
         return sorted_by_points
 
-    def add_control_locations(self, canvas_map: np.ndarray, t_event: float) -> np.ndarray:
+    def add_control_locations(self, canvas_map: np.ndarray) -> np.ndarray:
         """
         Add circles over the control locations
-        Circles change colour as controls are visited more often
 
         args:
         - canvas_map: numpy array representing the rogaining map
@@ -299,7 +298,7 @@ class ResultsPlotter:
 
         leg_stats = self.leg_statistics.set_index("leg")["leg_count"].to_dict()
         for leg, visit_count in leg_stats.items():
-            self.canvas_map = self.add_control_locations(self.canvas_map, -1)
+            self.canvas_map = self.add_control_locations(self.canvas_map)
 
             start_control, end_control = leg.split(":")
 
