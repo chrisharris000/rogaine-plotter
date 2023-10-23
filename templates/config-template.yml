@@ -1,6 +1,5 @@
 ---
 team_number: "1" # team number to make focus of statistics
-replay_length: 2.0  # mins, total time to replay event
 event_length: 12.0  # hours, total time of rogaining event
 event_name: "X hr Rogaining Event"  # name of rogaining event to be display as title
 results_directory: "path/to/directory"  # path to directory containing results of event
