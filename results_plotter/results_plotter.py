@@ -122,7 +122,7 @@ class ResultsPlotter:
                     )
 
         # top 3 teams
-        self.sorted_team_points = self._get_leading_team(t_event)
+        self.sorted_team_points = self._get_leading_teams(t_event)
 
         first_team_number, first_team_points = self.sorted_team_points[0]
         first_team_text = f"1st place: Team {first_team_number}, {first_team_points} pts"
@@ -249,7 +249,7 @@ class ResultsPlotter:
 
         return canvas_map
 
-    def _get_leading_team(self, t_event: float) -> "list[tuple[str, int]]":
+    def _get_leading_teams(self, t_event: float) -> "list[tuple[str, int]]":
         """
         Return teams ordered by points at time t_event seconds in event
 
