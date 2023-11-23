@@ -12,13 +12,8 @@ class PixelCoordinate:
     x: int
     y: int
 
-def get_config():
-    with open("config.yml", "r") as config_fp:
-        return yaml.safe_load(config_fp)
-
-def get_control_coordinates():
+def get_control_coordinates(config: dict):
     control_coordinates = {}
-    config = get_config()
     with open(config["control_coordinates"]) as control_fp:
         csvreader = csv.reader(control_fp)
         _fields = next(csvreader)
