@@ -4,6 +4,9 @@ import easygui
 import yaml
 
 from map_reader import map_reader
+from results_plotter import results_plotter
+from results_reader import results_reader
+import utils
 
 class UserGui:
     """
@@ -12,6 +15,10 @@ class UserGui:
     def __init__(self):
         self.config = {}
         self.config_save_dir = ""
+        self.results_rdr = None # ResultsReader
+        self.results = {}   # str: pd.DataFrame
+        self.control_coords = {}    # str: PixelCoordinate
+        self.leg_stats = [] # pd.DataFrame
 
     def show_homepage(self):
         """
@@ -44,6 +51,10 @@ class UserGui:
         config_path = easygui.fileopenbox(msg, title, filetypes=filetypes)
         with open(config_path, "r") as config_fp:
             self.config = yaml.safe_load(config_fp)
+
+        self.control_coords = utils.get_control_coordinates(self.config)
+        self.results_rdr = results_reader.ResultsReader(self.config, self.control_coords)
+        self.leg_stats = self.results_rdr.parse_leg_statistics_csv()
     
     def show_create_config_option(self):
         """
@@ -83,6 +94,14 @@ class UserGui:
 
         # prompt user to measure map scale
         self._load_user_map_scale_measure()
+
+    def replay_event(self):
+        """
+        Open windows to replay event result
+        """
+        self.results = self.results_rdr.parse_csv_results_directory()
+        pltr = results_plotter.ResultsPlotter(self.config, self.results, self.control_coords, self.leg_stats)
+        pltr.plot_results()
 
     def _get_text_input(self):
         """

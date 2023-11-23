@@ -10,7 +10,7 @@ if response == "Create Config":
 elif response == "Load Config":
     ui.show_load_config_option()
 
-print(ui.config)
+ui.replay_event()
 
 # config = get_config()
 # control_coords = get_control_coordinates()
@@ -26,8 +26,3 @@ print(ui.config)
 
 # # # read from csv
 # # results = res_rdr.parse_csv_results_directory()
-
-# # plot results
-# results = results_reader.ResultsReader(config, control_coords).parse_csv_results_directory()
-# pltr = results_plotter.ResultsPlotter(config, results, control_coords, leg_stats)
-# pltr.plot_results()

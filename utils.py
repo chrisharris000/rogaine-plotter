@@ -12,7 +12,7 @@ class PixelCoordinate:
     x: int
     y: int
 
-def get_control_coordinates(config: dict):
+def get_control_coordinates(config: dict) -> dict:
     control_coordinates = {}
     with open(config["control_coordinates"]) as control_fp:
         csvreader = csv.reader(control_fp)
