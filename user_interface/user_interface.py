@@ -1,3 +1,4 @@
+from pathlib import Path
 import sys
 
 import easygui
@@ -72,9 +73,6 @@ class UserGui:
         # get team number and event length
         self._get_text_input()
 
-        # get path to results directory
-        self._get_results_directory()
-
         # get path to map
         self._get_map_path()
 
@@ -90,22 +88,15 @@ class UserGui:
         # get path to save config
         self._get_config_save_location()
 
-        # prompt user to identify control coordinates
-        self._load_control_coordinates_identification()
-
         # prompt user to measure map scale
         self._load_user_map_scale_measure()
 
-        # parse txt files to csv
+        # get path to results directory
+        self._get_results_directory()
+
         self.control_coords = utils.get_control_coordinates(self.config)
         self.results_rdr = results_reader.ResultsReader(self.config, self.control_coords)
-        self.results = self.results_rdr.parse_txt_results_directory()
-        self.leg_stats = self.results_rdr.parse_leg_statistics_txt()
-        self.control_stats = self.results_rdr.parse_control_statistics_txt()
-
-        self.results_rdr.write_csv_results(self.results)
-        self.results_rdr.write_control_statistics_csv(self.control_stats, self.config["control_statistics"])
-        self.results_rdr.write_leg_statistics_csv(self.leg_stats, self.config["leg_statistics"])
+        self.leg_stats = self.results_rdr.parse_leg_statistics_csv()
 
     def replay_event(self):
         """
@@ -116,6 +107,7 @@ class UserGui:
         self.leg_stats = self.results_rdr.parse_leg_statistics_csv()
         pltr = results_plotter.ResultsPlotter(self.config, self.results, self.control_coords, self.leg_stats)
         pltr.plot_results()
+        pltr.display_leg_stats()
 
     def _get_text_input(self):
         """
@@ -141,8 +133,8 @@ class UserGui:
                 return {}   # user selected <cancel>
         team_number, event_length = field_values
 
-        self.config["team_number"] = team_number
-        self.config["event_length"] = event_length
+        self.config["team_number"] = str(team_number)
+        self.config["event_length"] = float(event_length)
 
     def _get_results_directory(self) -> str:
         """
@@ -152,6 +144,12 @@ class UserGui:
         title = "Results directory selection"
         results_dir = easygui.diropenbox(msg, title)
         self.config["results_directory"] = results_dir
+        
+        # parse txt files to csv
+        control_coords = utils.get_control_coordinates(self.config)
+        temp_results_rdr = results_reader.ResultsReader(self.config, control_coords)
+        temp_results = temp_results_rdr.parse_txt_results_directory()
+        temp_results_rdr.write_csv_results(temp_results)
     
     def _get_map_path(self):
         """
@@ -172,6 +170,9 @@ class UserGui:
         control_coords_dir = easygui.diropenbox(msg, title)
         self.config["control_coordinates"] = f"{control_coords_dir}/control-coordinates.csv"
 
+        # prompt user to select coordinates with gui
+        self._load_control_coordinates_identification()
+
     def _get_leg_stats(self):
         """
         Get path to leg statistics
@@ -180,7 +181,13 @@ class UserGui:
         title = "Leg statistics selection"
         filetypes = ["*.txt"]
         leg_stats_file = easygui.fileopenbox(msg, title, filetypes=filetypes)
-        self.config["leg_statistics"] = leg_stats_file
+        leg_stats_dir = Path(leg_stats_file).parent
+        self.config["leg_statistics"] = str(leg_stats_dir / "leg-statistics.csv")
+
+        # write file as csv
+        temp_results_rdr = results_reader.ResultsReader(self.config, {})
+        leg_stats = temp_results_rdr.parse_leg_statistics_txt()
+        temp_results_rdr.write_leg_statistics_csv(leg_stats, leg_stats_dir)
 
     def _get_control_stats(self):
         """
@@ -190,7 +197,13 @@ class UserGui:
         title = "Control statistics selection"
         filetypes = ["*.txt"]
         control_stats_file = easygui.fileopenbox(msg, title, filetypes=filetypes)
-        self.config["control_statistics"] = control_stats_file
+        control_stats_dir = Path(control_stats_file).parent
+        self.config["control_statistics"] = str(control_stats_dir / "control-statistics.csv")
+
+        # parse txt file to csv
+        temp_results_rdr = results_reader.ResultsReader(self.config, {})
+        control_stats = temp_results_rdr.parse_control_statistics_txt()
+        temp_results_rdr.write_control_statistics_csv(control_stats, control_stats_dir)
     
     def _get_config_save_location(self):
         """

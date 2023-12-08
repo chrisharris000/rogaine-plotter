@@ -1,7 +1,7 @@
 from user_interface import user_interface
 
 ui = user_interface.UserGui()
-# ui.show_homepage()
+ui.show_homepage()
 response = ui.show_config_prompt()
 
 if response == "Create Config":
@@ -12,3 +12,4 @@ elif response == "Load Config":
     ui.show_load_config_option()
 
 ui.replay_event()
+# ui.display_leg_stats()
