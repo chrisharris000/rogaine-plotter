@@ -19,6 +19,7 @@ class UserGui:
         self.results = {}   # str: pd.DataFrame
         self.control_coords = {}    # str: PixelCoordinate
         self.leg_stats = [] # pd.DataFrame
+        self.control_stats = [] # pd.DataFrame
 
     def show_homepage(self):
         """
@@ -95,11 +96,24 @@ class UserGui:
         # prompt user to measure map scale
         self._load_user_map_scale_measure()
 
+        # parse txt files to csv
+        self.control_coords = utils.get_control_coordinates(self.config)
+        self.results_rdr = results_reader.ResultsReader(self.config, self.control_coords)
+        self.results = self.results_rdr.parse_txt_results_directory()
+        self.leg_stats = self.results_rdr.parse_leg_statistics_txt()
+        self.control_stats = self.results_rdr.parse_control_statistics_txt()
+
+        self.results_rdr.write_csv_results(self.results)
+        self.results_rdr.write_control_statistics_csv(self.control_stats, self.config["control_statistics"])
+        self.results_rdr.write_leg_statistics_csv(self.leg_stats, self.config["leg_statistics"])
+
     def replay_event(self):
         """
         Open windows to replay event result
         """
         self.results = self.results_rdr.parse_csv_results_directory()
+        self.control_stats = self.results_rdr.parse_control_statistics_csv()
+        self.leg_stats = self.results_rdr.parse_leg_statistics_csv()
         pltr = results_plotter.ResultsPlotter(self.config, self.results, self.control_coords, self.leg_stats)
         pltr.plot_results()
 

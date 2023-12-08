@@ -161,12 +161,12 @@ class ResultsReader:
         control_statistics = pd.read_csv(self.config["control_statistics"])
         return control_statistics
 
-    def write_control_statistics_csv(self, control_statistics: pd.DataFrame, save_directory: Path) -> None:
+    def write_control_statistics_csv(self, control_statistics: pd.DataFrame, save_directory: str) -> None:
         """
         Write the control statistics dataframe as a csv file
         """
         filename = f"control-statistics.csv"
-        filepath = save_directory / filename
+        filepath = Path(save_directory) / Path(filename)
         control_statistics.to_csv(filepath, index=False)
 
     def parse_leg_statistics_txt(self) -> pd.DataFrame:
@@ -191,10 +191,10 @@ class ResultsReader:
         leg_statistics = pd.read_csv(self.config["leg_statistics"])
         return leg_statistics
 
-    def write_leg_statistics_csv(self, leg_statistics: pd.DataFrame, save_directory: Path) -> None:
+    def write_leg_statistics_csv(self, leg_statistics: pd.DataFrame, save_directory: str) -> None:
         """
         Write the leg statistics dataframe as a csv file
         """
         filename = f"leg-statistics.csv"
-        filepath = save_directory / filename
+        filepath = Path(save_directory) / Path(filename)
         leg_statistics.to_csv(filepath, index=False)
